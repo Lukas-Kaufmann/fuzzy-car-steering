@@ -29,4 +29,6 @@ export class Point {
     subtract(other:Point):Point {
         return new Point(this.x - other.x, this.y - other.y)
     }
+
+    toArray = () => [this.x, this.y]
 }

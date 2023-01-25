@@ -1,5 +1,5 @@
 import { Point } from "./point";
-
+var segmentIntersect = require('line-segment-intersect-2d')
 
 export class LineSegment {
     a: Point
@@ -12,15 +12,10 @@ export class LineSegment {
 
 
     intersection(other: LineSegment) : Point | undefined {
-        let t = (((this.a.x - other.a.x) * (other.a.y - other.b.y)) - ((this.a.y - other.a.y)*(other.a.x - other.b.x)))/(((this.a.x - this.b.x)*(other.a.y - other.b.y)) - ((this.a.y - this.b.y)*(other.a.x - other.b.x)))
-        //let u = ((this.a.x - other.a.x) * (this.a.y - this.b.y) - (this.a.y - other.a.y)*(other.a.x - other.b.x))/((this.a.x - this.b.x)*(other.a.y - other.b.y) - (this.a.y - this.b.y)*(this.a.x - other.b.x))
-
-        if (t > 1 || t < 0) {
-            return undefined
+        let pointArray : number[] | null = segmentIntersect([], this.a.toArray(), this.b.toArray(), other.a.toArray(), other.b.toArray())
+        if (pointArray) {
+            return new Point(pointArray[0], pointArray[1])
         }
-
-        let intersection = this.a.add(this.b.subtract(this.a).times(t))
-
-        return intersection
+        return undefined
     }
 }
