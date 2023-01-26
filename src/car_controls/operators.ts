@@ -1,8 +1,8 @@
 
 //these are fuzzy operators
 
-let and = (a: number, b: number) => Math.min(a, b)
-let or = (a: number, b: number) => Math.max(a, b)
+let and = (...args: number[]) => Math.min(...args)
+let or = (...args: number[]) => Math.max(...args)
 
 
 export {and, or}

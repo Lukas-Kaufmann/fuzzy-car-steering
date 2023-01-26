@@ -12,6 +12,8 @@ let path : Path
 let borders: Array<Path> = []
 let car : Car | undefined = undefined
 
+
+
 function gameLoop() {
     requestAnimationFrame(gameLoop);
     ctx.fillStyle = "white";
@@ -60,6 +62,11 @@ function gameLoop() {
 let isPathDrawing = false
 let pathDrawingEnabled = true
 
+let isPlacingStart = true
+
+let isPlacingDestination = false
+
+
 let borderDrawingEnabled = false
 let isBorderDrawing = false
 
@@ -69,6 +76,34 @@ let drawSensorLines = true //TODO change to false
 
 function setupControls() {
     let controlsContainer = document.createElement("div")
+
+
+    let placeStartControl = document.createElement("input")
+    placeStartControl.type = "checkbox"
+    placeStartControl.checked = true
+    placeStartControl.onchange = () => {
+        isPlacingStart = !isPlacingStart    
+    }
+    let startLabel = document.createElement("label")
+    startLabel.textContent = "Place start"
+
+    controlsContainer.appendChild(placeStartControl)
+    controlsContainer.appendChild(startLabel)
+
+    
+    let placeDestinationControl = document.createElement("input")
+    placeDestinationControl.type = "checkbox"
+    placeDestinationControl.checked = false
+    placeDestinationControl.onchange = () => {
+        isPlacingDestination = !isPlacingDestination
+    }
+    let destinationLabel = document.createElement("label")
+    destinationLabel.textContent = "Place destination"
+
+    controlsContainer.appendChild(placeDestinationControl)
+    controlsContainer.appendChild(destinationLabel)
+
+
     let drawPathControl = document.createElement("input")
     drawPathControl.textContent = "Draw Path"
     drawPathControl.type = "checkbox"

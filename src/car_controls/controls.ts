@@ -11,31 +11,25 @@ let reverse = leftOpenFuzzySet(-1, 0)
 let forward = rightOpenFuzzySet(0, 1)
 
 let forwardFast = rightOpenFuzzySet(2, 3)
-let forwardSlowly = triangleFuzzySet(0, 1, 3)
 
 
+let left = leftOpenFuzzySet(-1, 0)
+let straight = triangleFuzzySet(-0.5, 0, 0.5)
+let right = rightOpenFuzzySet(0, 1)
+
+
+
+//outputs
 let speedUp_acc = 20
 let brakeHard_acc = -150
 let brake_acc = -20
 let reverse_acc = brake_acc
 
 let steerStraight = 0
-let turnLeft = -2
-let turnLeftHard = -5
-let turnRight = 2
-let turnRightHard = 5
-
-let farLeft = leftOpenFuzzySet(10, 0)
-let farRight = rightOpenFuzzySet(0, 10)
-
-let left = leftOpenFuzzySet(100, 0)
-let right = rightOpenFuzzySet(0, 100)
+let turnLeft = -3
+let turnRight = 3
 
 
-enum Output {
-  ACCELERATION,
-  STEERING
-}
 
 function centerOfGravity(arr: number[][]) : number {
   let nomenator = 0
@@ -47,38 +41,42 @@ function centerOfGravity(arr: number[][]) : number {
   return (nomenator / divisor) || 0
 }
 
-
 export function getSteeringAndAcceleration(speed: number, leftDistance: number, frontDistance: number, rightDistance: number, goalDistance: number, directiontoGoal: number): [number, number] /*steering, acceleration */ {
-  //TODO proper fuzzy way of calculating the crisp output
+
   let individualAccelerations: number[][] = []
   let individualSteerings: number[][] = []
-  
-  function addToResult(membershipValue: number, parameter: Output, outputValue: number) {
-    if (parameter == Output.ACCELERATION) {
-      individualAccelerations.push([membershipValue, outputValue])
-    }
-    if (parameter == Output.STEERING) {
-      individualSteerings.push([membershipValue, outputValue])
-    }
+
+
+  function addToSteering(membershipValue: number, outputValue: number) {
+    individualSteerings.push([membershipValue, outputValue])
+  }
+
+  function addToAcceleration(membershipValue: number, outputValue: number) {
+    individualAccelerations.push([membershipValue, outputValue])
   }
 
   //rules
   //syntax for the rules is a bit of a mess, couldnt figure out how to make it into a nice sentence like
   // If speed is forward and front distance is close then acceleration is brake
-  addToResult(close(frontDistance), Output.ACCELERATION, brake_acc)
-  addToResult(and(veryClose(frontDistance), forwardFast(speed)), Output.ACCELERATION, brakeHard_acc)
-  addToResult(farAway(frontDistance), Output.ACCELERATION, speedUp_acc)
-  addToResult(veryClose(frontDistance), Output.ACCELERATION, brakeHard_acc)
+  addToAcceleration(close(frontDistance), brake_acc)
+  addToAcceleration(and(veryClose(frontDistance), forwardFast(speed)), brakeHard_acc)
+  addToAcceleration(and(farAway(frontDistance), farAway(goalDistance)), speedUp_acc)
+  addToAcceleration(veryClose(frontDistance), brakeHard_acc)
 
-  addToResult(and(close(leftDistance), farAway(rightDistance)), Output.STEERING, turnRight)
-  addToResult(and(close(rightDistance), farAway(leftDistance)), Output.STEERING, turnLeft)
+  //addToAcceleration(reverse(speed), speedUp_acc)//this rule is simply to stop the car going forth and back
 
-  addToResult(and(farAway(goalDistance), left(directiontoGoal)), Output.STEERING, turnLeft)
-  addToResult(and(farAway(goalDistance), right(directiontoGoal)), Output.STEERING, turnRight)
+  addToSteering(and(close(leftDistance), farAway(rightDistance)), turnRight)
+  addToSteering(and(close(rightDistance), farAway(leftDistance)), turnLeft)
 
-  //apply rules (first define rules)
+  addToSteering(and(farAway(goalDistance), left(directiontoGoal), farAway(leftDistance)), turnLeft)
+  addToSteering(and(farAway(goalDistance), right(directiontoGoal), farAway(rightDistance)), turnRight)
 
-  //TODO way to get results
+  addToSteering(and(straight(directiontoGoal), farAway(frontDistance)), steerStraight)
+  
+
+  addToAcceleration(and(close(goalDistance), forward(speed)), brake_acc)
+  addToAcceleration(and(close(goalDistance), forwardFast(speed)), brakeHard_acc)
+  addToAcceleration(and(veryClose(goalDistance), forwardFast(speed)), brakeHard_acc)
 
   //defuzzify
   return [centerOfGravity(individualSteerings), centerOfGravity(individualAccelerations)]

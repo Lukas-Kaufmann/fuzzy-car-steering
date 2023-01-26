@@ -28,29 +28,7 @@ export class Car {
     //sensor variables
     borderDistances: [number, number, number] = [MAX_DISTANCE, MAX_DISTANCE, MAX_DISTANCE]
 
-    update = (path: Path, borders: Path[]) => {
-
-        
-
-        let minPathDistance = Infinity
-        let minPoint : Point | undefined = undefined
-
-        for (let i = 0; i < path.points.length; i+=1) {
-            let point = path.points[0]
-            let distance = this.position.distance(point)
-            //we have to make sure the point is in front of the car
-            let direction = this.position.directionTo(point)
-            let isInFront = direction > (-Math.PI / 2) || direction < (Math.PI / 2)
-            if (distance < minPathDistance && isInFront) {
-                minPathDistance = distance
-                minPoint = point
-            }
-        }
-        
-        let directionToPath =  undefined
-        if (minPoint) {
-            directionToPath = this.position.directionTo(minPoint) - this.direction
-        }
+    update = (path: Path, borders: Path[]) => {        
 
         let sensorLines = SENSOR_ANGLES_DG
             .map(dg => radians(dg))
@@ -80,14 +58,9 @@ export class Car {
         })//map to smallest distance
         this.borderDistances = [distances[0], distances[1], distances[2]]
 
-        //borderDistances: [number, number, number], distanceToPath: number, directionToPath: number, alignmentToPath: number
-        //TODO delete this
+        let goal = path.points[path.points.length - 1]
 
-        let [steering, acceleration] = getSteeringAndAcceleration(this.speed, ...this.borderDistances, minPathDistance, directionToPath)
-
-        //TODO rethink mechanics of steering, instead of rotating the car nudge the change to the velocity vector
-
-        //then adjust direction and velocity from the steering and acceleration
+        let [steering, acceleration] = getSteeringAndAcceleration(this.speed, ...this.borderDistances, this.position.distance(goal), this.position.directionTo(goal) - this.direction)
 
         this.speed += acceleration * ACCELERATION_CONSTANT
 

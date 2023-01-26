@@ -78,6 +78,5 @@ function rightOpenFuzzySet(left: number, topLeft: number) : Membership {
         return k * deltaCrisp
     }
 }
-//TODO trapeziodal and triangular classes
 
 export {triangleFuzzySet, trapeziodalFuzzySet, leftOpenFuzzySet, rightOpenFuzzySet}
