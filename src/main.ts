@@ -70,7 +70,7 @@ let isPlacingDestination = false
 let borderDrawingEnabled = false
 let isBorderDrawing = false
 
-let drawSensorLines = true //TODO change to false
+let drawSensorLines = false
 
 
 
@@ -136,8 +136,6 @@ function setupControls() {
 
     let sensorLines = document.createElement("input")
     sensorLines.type = "checkbox"
-    //TODO remove
-    sensorLines.checked = true
     
     sensorLines.onclick = () => {
         drawSensorLines = !drawSensorLines
