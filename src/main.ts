@@ -8,11 +8,13 @@ var ctx: CanvasRenderingContext2D;
 let width = window.innerWidth;
 let height = window.innerHeight;
 
-let path : Path
 let borders: Array<Path> = []
 let car : Car | undefined = undefined
 
 
+let start = new Point(100, 100)
+
+let destination : Point | undefined = undefined
 
 function gameLoop() {
     requestAnimationFrame(gameLoop);
@@ -21,19 +23,21 @@ function gameLoop() {
 
 
     if (car) {
-        car.update(path, borders)
+        car.update(destination, borders)
     }
 
-    //draw path
-    if (path.points.length > 1) {
+    //draw start
+    ctx.beginPath()
+    ctx.fillStyle = "green"
+    ctx.arc(start.x, start.y, 10, 0, 2 * Math.PI)
+    ctx.fill()
+    
+    //draw destination
+    if (destination) {
         ctx.beginPath()
-        for (let i = 0; i < path.points.length; i+=1) {
-            let p = path.points[i]
-            ctx.lineTo(p.x, p.y)
-        }
-        ctx.strokeStyle = "blue"
-        ctx.lineWidth = 2
-        ctx.stroke()
+        ctx.fillStyle = "red"
+        ctx.arc(destination.x, destination.y, 10, 0, 2 * Math.PI)
+        ctx.fill()
     }
 
     //draw borders
@@ -58,10 +62,6 @@ function gameLoop() {
         }
     }
 }
-
-let isPathDrawing = false
-let pathDrawingEnabled = true
-
 let isPlacingStart = true
 
 let isPlacingDestination = false
@@ -103,21 +103,6 @@ function setupControls() {
     controlsContainer.appendChild(placeDestinationControl)
     controlsContainer.appendChild(destinationLabel)
 
-
-    let drawPathControl = document.createElement("input")
-    drawPathControl.textContent = "Draw Path"
-    drawPathControl.type = "checkbox"
-    drawPathControl.checked = true
-
-    drawPathControl.onchange = () => {
-        pathDrawingEnabled = !pathDrawingEnabled
-    }
-    let pathLabel = document.createElement("label")
-    pathLabel.textContent = "Draw Path"
-
-    controlsContainer.appendChild(drawPathControl)
-    controlsContainer.appendChild(pathLabel)
-
     let borderDrawControl = document.createElement("input")
     borderDrawControl.type = "checkbox"
     borderDrawControl.onchange = () => {
@@ -132,7 +117,7 @@ function setupControls() {
     let resetButton = document.createElement("button")
     resetButton.textContent = "Reset"
     resetButton.onclick = () => {
-        path = new Path()
+        destination = undefined
         borders = []
         car = undefined
     }
@@ -141,13 +126,10 @@ function setupControls() {
     let spawnCar = document.createElement("button")
     spawnCar.textContent = "Spawn Car"
     spawnCar.onclick = () => {
-        
-        if (path.points.length > 1) {
-            car = new Car()
-            car.position = path.points[0]
 
-            car.direction = car.position.directionTo(path.points[1])
-        }
+        car = new Car()
+        car.position = start
+        car.direction = car.position.directionTo(destination)
     }
 
     controlsContainer.appendChild(spawnCar)
@@ -186,26 +168,29 @@ window.onload = () => {
     container.appendChild(canvas);
     document.body.appendChild(container);
     ctx = canvas.getContext("2d");
-    path = new Path()
 
     canvas.onmousedown = (e) => {
-        if (pathDrawingEnabled) {
-            isPathDrawing = true
-            path = new Path()
+        let canvasX = e.clientX - canvas.offsetLeft
+        let canvasY =  e.clientY - canvas.offsetTop
+
+        if (isPlacingStart) {
+            start = new Point(canvasX, canvasY)
         }
+
+        if (isPlacingDestination) {
+            destination = new Point(canvasX, canvasY)
+        }
+
 
         if (borderDrawingEnabled) {
             isBorderDrawing = true
             borders.push(new Path())
         }
         
-        let canvasX = e.clientX - canvas.offsetLeft
-        let canvasY =  e.clientY - canvas.offsetTop
+        
     }
 
     canvas.onmouseup = (e) => {
-        isPathDrawing = false
-        path = path.smooth()
 
         if (borderDrawingEnabled) {
             isBorderDrawing = false
@@ -217,11 +202,7 @@ window.onload = () => {
     canvas.onmousemove = (e) => {
         let canvasX = e.clientX - canvas.offsetLeft
         let canvasY =  e.clientY - canvas.offsetTop
-        if (isPathDrawing) {
-            
-            
-            path.addPoint(new Point(canvasX, canvasY))
-        }
+
         if (isBorderDrawing) {
             borders[borders.length-1].addPoint(new Point(canvasX, canvasY))
         }

@@ -28,7 +28,7 @@ export class Car {
     //sensor variables
     borderDistances: [number, number, number] = [MAX_DISTANCE, MAX_DISTANCE, MAX_DISTANCE]
 
-    update = (path: Path, borders: Path[]) => {        
+    update = (destination: Point, borders: Path[]) => {        
 
         let sensorLines = SENSOR_ANGLES_DG
             .map(dg => radians(dg))
@@ -58,9 +58,7 @@ export class Car {
         })//map to smallest distance
         this.borderDistances = [distances[0], distances[1], distances[2]]
 
-        let goal = path.points[path.points.length - 1]
-
-        let [steering, acceleration] = getSteeringAndAcceleration(this.speed, ...this.borderDistances, this.position.distance(goal), this.position.directionTo(goal) - this.direction)
+        let [steering, acceleration] = getSteeringAndAcceleration(this.speed, ...this.borderDistances, this.position.distance(destination), this.position.directionTo(destination) - this.direction)
 
         this.speed += acceleration * ACCELERATION_CONSTANT
 
